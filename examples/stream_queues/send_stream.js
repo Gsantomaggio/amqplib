@@ -12,7 +12,7 @@ async function sendStream () {
 
     // Define the queue stream
     // Mandatory: exclusive: false, durable: true  autoDelete: false
-    const ok = await ch.assertQueue(q, {
+    await ch.assertQueue(q, {
         exclusive: false,
         durable: true,
         autoDelete: false,
@@ -24,8 +24,7 @@ async function sendStream () {
 
     const msg = 'Hello World!';
 
-    // send the message to the stream queue
-    const _qok = await ok;
+    // Send the message to the stream queue
     await ch.sendToQueue(q, Buffer.from(msg));
     console.log(" [x] Sent '%s'", msg);
     await ch.close();

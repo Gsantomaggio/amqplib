@@ -5,9 +5,7 @@ const amqp = require('amqplib');
 async function receiveStream() {
 
     const conn = await amqp.connect('amqp://localhost');
-    process.once('SIGINT', () => {
-        conn.close();
-    });
+    process.once('SIGINT', () => { conn.close(); });
 
     const ch = await conn.createChannel();
 
@@ -15,7 +13,7 @@ async function receiveStream() {
 
     // Define the queue stream
     // Mandatory: exclusive: false, durable: true  autoDelete: false
-    let ok = await ch.assertQueue(q, {
+    await ch.assertQueue(q, {
         exclusive: false,
         durable: true,
         autoDelete: false,
@@ -27,19 +25,17 @@ async function receiveStream() {
 
     ch.qos(100); // this is mandatory
 
-    const _qok = await ok
-        ch.consume(q, (msg) => {
-            console.log(" [x] Received '%s'", msg.content.toString());
-            ch.ack(msg); // mandatory
-        }, {
-            noAck: false,
-            arguments: {
-                'x-stream-offset': 'first' // here you can specify the offset: : first, last, next, and timestamp
-                // with first start consuming always from the beginning
-            }
-        });
+    ch.consume(q, (msg) => {
+        console.log(" [x] Received '%s'", msg.content.toString());
+        ch.ack(msg); // mandatory
+    }, {
+        noAck: false,
+        arguments: {
+            'x-stream-offset': 'first' // here you can specify the offset: : first, last, next, and timestamp
+            // with first start consuming always from the beginning
+        }
+    });
 
-    const _consumeOk = await ok;
     console.log(' [*] Waiting for messages. To exit press CTRL+C');
 }
 
