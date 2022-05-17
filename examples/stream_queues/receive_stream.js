@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-var amqp = require('amqplib');
+const amqp = require('amqplib');
 
 amqp.connect('amqp://localhost').then(function (conn) {
     process.once('SIGINT', function () { conn.close(); });
     return conn.createChannel().then(function (ch) {
 
-        var q = 'my_first_stream';
+        const q = 'my_first_stream';
         // Define the queue stream
         // Mandatory: exclusive: false, durable: true  autoDelete: false
-        var ok = ch.assertQueue(q, {
+        let ok = ch.assertQueue(q, {
             exclusive: false,
             durable: true,
             autoDelete: false,
