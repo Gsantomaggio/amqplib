@@ -2,33 +2,67 @@
 
 const amqp = require('amqplib');
 
-amqp.connect('amqp://localhost').then(conn => {
+async function sendStream () {
 
-    conn.createChannel().then(ch => {
+    const conn = await amqp.connect('amqp://localhost');
 
-        const q = 'my_first_stream';
+    const ch = await conn.createChannel();
 
-        // Define the queue stream
-        // Mandatory: exclusive: false, durable: true  autoDelete: false
-        const ok = ch.assertQueue(q, {
-            exclusive: false,
-            durable: true,
-            autoDelete: false,
-            arguments: {
-                'x-queue-type': 'stream', // Mandatory to define stream queue
-                'x-max-length-bytes': 2_000_000_000 // Set the queue retention to 2GB else the stream doesn't have any limit
-            }
-        });
+    const q = 'my_first_stream';
 
-        const msg = 'Hello World!';
+    // Define the queue stream
+    // Mandatory: exclusive: false, durable: true  autoDelete: false
+    const ok = await ch.assertQueue(q, {
+        exclusive: false,
+        durable: true,
+        autoDelete: false,
+        arguments: {
+            'x-queue-type': 'stream', // Mandatory to define stream queue
+            'x-max-length-bytes': 2_000_000_000 // Set the queue retention to 2GB else the stream doesn't have any limit
+        }
+    });
 
-        // send the message to the stream queue
-        ok.then(_qok => {
-            ch.sendToQueue(q, Buffer.from(msg));
-            console.log(" [x] Sent '%s'", msg);
-            ch.close();
-        });
+    const msg = 'Hello World!';
 
-    }).finally(() => { conn.close(); });
+    // send the message to the stream queue
+    const _qok = await ok
+    ch.sendToQueue(q, Buffer.from(msg));
+    console.log(" [x] Sent '%s'", msg);
+    ch.close();
 
-}).catch(console.warn);
+    conn.close();
+}
+
+sendStream().catch(console.warn)
+
+
+// amqp.connect('amqp://localhost').then(conn => {
+//
+//     conn.createChannel().then(ch => {
+//
+//         const q = 'my_first_stream';
+//
+//         // Define the queue stream
+//         // Mandatory: exclusive: false, durable: true  autoDelete: false
+//         const ok = ch.assertQueue(q, {
+//             exclusive: false,
+//             durable: true,
+//             autoDelete: false,
+//             arguments: {
+//                 'x-queue-type': 'stream', // Mandatory to define stream queue
+//                 'x-max-length-bytes': 2_000_000_000 // Set the queue retention to 2GB else the stream doesn't have any limit
+//             }
+//         });
+//
+//         const msg = 'Hello World!';
+//
+//         // send the message to the stream queue
+//         ok.then(_qok => {
+//             ch.sendToQueue(q, Buffer.from(msg));
+//             console.log(" [x] Sent '%s'", msg);
+//             ch.close();
+//         });
+//
+//     }).finally(() => { conn.close(); });
+//
+// }).catch(console.warn);
