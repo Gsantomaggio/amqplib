@@ -2,9 +2,10 @@
 
 const amqp = require('amqplib');
 
-amqp.connect('amqp://localhost').then(function (conn) {
-    process.once('SIGINT', function () { conn.close(); });
-    return conn.createChannel().then(function (ch) {
+amqp.connect('amqp://localhost').then(conn => {
+    process.once('SIGINT', () => { conn.close(); });
+
+    conn.createChannel().then(ch => {
 
         const q = 'my_first_stream';
         // Define the queue stream
@@ -21,23 +22,23 @@ amqp.connect('amqp://localhost').then(function (conn) {
 
         ch.qos(100); // this is mandatory
 
-        ok = ok.then(function (_qok) {
-            return ch.consume(q, function (msg) {
+        ok = ok.then(_qok => {
+
+            ch.consume(q, (msg) => {
                 console.log(" [x] Received '%s'", msg.content.toString());
                 ch.ack(msg); // mandatory
             }, {
                 noAck: false,
                 arguments: {
                     'x-stream-offset': 'first' // here you can specify the offset: : first, last, next, and timestamp
-                    // with first start consuming always from the beginning 
-
+                    // with first start consuming always from the beginning
                 }
-            },
-            );
+            });
         });
 
-        return ok.then(function (_consumeOk) {
+        ok.then(_consumeOk => {
             console.log(' [*] Waiting for messages. To exit press CTRL+C');
         });
     });
+
 }).catch(console.warn);

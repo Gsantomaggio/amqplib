@@ -2,8 +2,10 @@
 
 const amqp = require('amqplib');
 
-amqp.connect('amqp://localhost').then(function (conn) {
-    return conn.createChannel().then(function (ch) {
+amqp.connect('amqp://localhost').then(conn => {
+
+    conn.createChannel().then(ch => {
+
         const q = 'my_first_stream';
 
         // Define the queue stream
@@ -21,10 +23,12 @@ amqp.connect('amqp://localhost').then(function (conn) {
         const msg = 'Hello World!';
 
         // send the message to the stream queue
-        return ok.then(function (_qok) {
+        ok.then(_qok => {
             ch.sendToQueue(q, Buffer.from(msg));
             console.log(" [x] Sent '%s'", msg);
-            return ch.close();
+            ch.close();
         });
-    }).finally(function () { conn.close(); });
+
+    }).finally(() => { conn.close(); });
+
 }).catch(console.warn);
