@@ -6,7 +6,6 @@ const amqp = require('amqplib');
 async function sendStream () { //=======================================================================================
 
     try {
-
         const conn = await amqp.connect('amqp://localhost');
         const ch = await conn.createChannel();
         const q = 'my_first_stream';
@@ -31,12 +30,12 @@ async function sendStream () { //===============================================
 
         // Close connection
         conn.close();
-
     }
     // Catch and display any errors in the console
     catch(e) { console.log(e) }
 }
 //======================================================================================================================
+
 
 module.exports = {
     sendStream

@@ -2,14 +2,12 @@
 
 const amqp = require('amqplib');
 
+
 async function receiveStream() { //=====================================================================================
 
     try {
-
         const conn = await amqp.connect('amqp://localhost');
-        process.once('SIGINT', () => {
-            conn.close();
-        });
+        process.once('SIGINT', () => { conn.close(); });
 
         const ch = await conn.createChannel();
         const q = 'my_first_stream';
@@ -40,12 +38,12 @@ async function receiveStream() { //=============================================
         });
 
         console.log(' [*] Waiting for messages. To exit press CTRL+C');
-
     }
     // Catch and display any errors in the console
     catch(e) { console.log(e) }
 }
 //======================================================================================================================
+
 
 module.exports = {
     receiveStream
