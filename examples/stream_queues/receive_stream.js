@@ -1,39 +1,37 @@
 #!/usr/bin/env node
-
 const amqp = require('amqplib');
 
 
-async function receiveStream() { //=====================================================================================
-
+async function receiveStream() {
     try {
-        const conn = await amqp.connect('amqp://localhost');
-        process.once('SIGINT', () => { conn.close(); });
+        const connection = await amqp.connect('amqp://localhost');
+        process.once('SIGINT', connection.close);
 
-        const ch = await conn.createChannel();
-        const q = 'my_first_stream';
+        const channel = await connection.createChannel();
+        const queue = 'my_first_stream';
 
         // Define the queue stream
         // Mandatory: exclusive: false, durable: true  autoDelete: false
-        await ch.assertQueue(q, {
+        await channel.assertQueue(queue, {
             exclusive: false,
             durable: true,
             autoDelete: false,
             arguments: {
-                'x-queue-type': 'stream', // Mandatory to define stream queue
-                'x-max-length-bytes': 2_000_000_000 // Set the queue retention to 2GB else the stream doesn't have any limit
+                'x-queue-type': 'stream',  // Mandatory to define stream queue
+                'x-max-length-bytes': 2_000_000_000  // Set the queue retention to 2GB else the stream doesn't have any limit
             }
         });
 
-        ch.qos(100); // this is mandatory
+        channel.qos(100);  // This is mandatory
 
-        ch.consume(q, (msg) => {
+        channel.consume(queue, (msg) => {
             console.log(" [x] Received '%s'", msg.content.toString());
-            ch.ack(msg); // mandatory
+            channel.ack(msg);  // Mandatory
         }, {
             noAck: false,
             arguments: {
-                'x-stream-offset': 'first' // here you can specify the offset: : first, last, next, and timestamp
-                // with first start consuming always from the beginning
+                'x-stream-offset': 'first'  // Here you can specify the offset: : first, last, next, and timestamp
+                                            // with first start consuming always from the beginning
             }
         });
 
@@ -42,11 +40,8 @@ async function receiveStream() { //=============================================
     // Catch and display any errors in the console
     catch(e) { console.log(e) }
 }
-//======================================================================================================================
 
 
 module.exports = {
     receiveStream
 }
-
-// To test call the function: receiveStream()
